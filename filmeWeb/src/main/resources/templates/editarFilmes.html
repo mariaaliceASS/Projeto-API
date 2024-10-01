@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atualizar Filme</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="light">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Cinema</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item"><a class="nav-link" href="/listarFilmes">Home</a></li>
+                <li class="nav-item"><button class="btn btn-outline-secondary" id="theme-toggle">Alternar Tema</button></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="container mt-5">
+        <h2>Atualizar Filme</h2>
+        <form id="updateForm" onsubmit="return false;">
+            <input type="hidden" name="id" id="filmeId" />
+
+            <div class="form-group">
+                <label for="titulo">Título:</label>
+                <input type="text" class="form-control" id="titulo" name="titulo" required />
+            </div>
+
+            <div class="form-group">
+                <label for="sinopse">Sinopse:</label>
+                <textarea class="form-control" id="sinopse" name="sinopse" required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="genero">Gênero:</label>
+                <input type="text" class="form-control" id="genero" name="genero" required />
+            </div>
+
+            <div class="form-group">
+                <label for="anolancamento">Ano de Lançamento:</label>
+                <input type="number" class="form-control" id="anolancamento" name="anolancamento" required />
+            </div>
+            <button type="button" class="btn btn-primary" onclick="atualizarFilme(event)">Atualizar Filme</button>
+        </form>
+        
+        <a href="/listarFilmes" class="btn btn-secondary mt-3">Voltar</a>
+    
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            function getQueryParam(param) {
+                const urlParams = new URLSearchParams(window.location.search);
+                return urlParams.get(param);
+            }
+
+            const filmeId = getQueryParam('filmeId');
+
+            $.ajax({
+                url: 'http://localhost:8080/api/filmes/buscar/' + filmeId,
+                type: 'GET',
+                success: function(filme) {
+                    $('#filmeId').val(filme.id);
+                    $('#titulo').val(filme.titulo);
+                    $('#sinopse').val(filme.sinopse);
+                    $('#genero').val(filme.genero);
+                    $('#anolancamento').val(filme.anolancamento);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Erro ao buscar o filme:', error);
+                }
+            });
+        });
+
+        function atualizarFilme(event) {
+            event.preventDefault();
+            
+            const filmeId = document.getElementById('filmeId').value; // Captura o ID do filme
+
+            const filme = {
+                id: filmeId,
+                titulo: document.getElementById('titulo').value,
+                sinopse: document.getElementById('sinopse').value,
+                genero: document.getElementById('genero').value,
+                anolancamento: document.getElementById('anolancamento').value
+            };
+
+            $.ajax({
+                type: 'PUT',
+                url: `http://localhost:8080/api/filmes/atualizar/${filmeId}`, // Usando filmeId
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify(filme),
+
+                success: function(response) {
+                    alert('Filme atualizado com sucesso!');
+                    window.location.href = 'listarFilmes'; // Redirecionar após sucesso
+                },
+
+                error: function() {
+                    alert('Erro ao atualizar filme. Tente novamente.');
+                }
+            });
+        }
+    </script>
+    <script src="/js/script.js"></script>
+</body>
+</html>

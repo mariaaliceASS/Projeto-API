@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Cadastro de Filmes</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="light">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Cinema</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item"><a class="nav-link" href="/listarFilmes">Home</a></li>
+                <li class="nav-item"><button class="btn btn-outline-secondary" id="theme-toggle">Alternar Tema</button></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="container mt-4">
+        <h1>Cadastrar Filme</h1>
+        <form id="cadastrarFilmeForm" onsubmit="cadastrarFilme(event)">
+            <div class="form-group">
+                <label for="titulo">Título:</label>
+                <input type="text" class="form-control" id="titulo" required>
+            </div>
+            <div class="form-group">
+                <label for="sinopse">Sinopse:</label>
+                <textarea class="form-control" id="sinopse" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="genero">Gênero:</label>
+                <input type="text" class="form-control" id="genero" required>
+            </div>
+            <div class="form-group">
+                <label for="anolancamento">Ano de Lançamento:</label>
+                <input type="number" class="form-control" id="anolancamento" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Cadastrar</button>
+        </form>
+        <a href="/listarFilmes" class="btn btn-secondary mt-3">Voltar</a>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        function cadastrarFilme(event) {
+            event.preventDefault(); // Evita o comportamento padrão do formulário
+            const filme = {
+                titulo: document.getElementById('titulo').value,
+                sinopse: document.getElementById('sinopse').value,
+                genero: document.getElementById('genero').value,
+                anolancamento: document.getElementById('anolancamento').value
+            };
+
+           $.ajax({
+                type:  'POST',
+                url: 'http://localhost:8080/api/filmes/adicionar',
+                contentType: 'application/json',
+                dataType : 'json',
+                data: JSON.stringify(filme),
+                
+                success: function(response) {
+                    window.location.href = 'listarFilmes';  // Redirecionar após sucesso
+                },
+                
+                error: function() {
+                    alert('Erro ao cadastrar filme. Tente novamente.');
+                }
+            });
+        }
+    </script>
+    <script src="/js/script.js"></script>
+</body>
+</html>

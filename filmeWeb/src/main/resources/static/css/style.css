@@ -1,0 +1,29 @@
+
+body.light {
+    background-color: white;
+    color: black;
+}
+
+body.dark {
+    background-color: black;
+    color: white;
+}
+
+body.dark .table {
+    background-color: black; /* Fundo da tabela no tema escuro */
+    color: white; /* Cor do texto no tema escuro */
+}
+
+body.dark .table th, 
+body.dark .table td {
+    border-color: rgba(255, 255, 255, 0.2);
+    color: white;/* Borda mais clara no tema escuro */
+}
+.navbar {
+    margin-bottom: 20px; /* Adiciona um espaço abaixo da navbar */
+}
+
+.hidden {
+    display: none;
+}
+

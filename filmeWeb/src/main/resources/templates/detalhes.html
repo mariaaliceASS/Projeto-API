@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Detalhes do filme</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="light">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Cinema</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item"><a class="nav-link" href="/listarFilmes">Home</a></li>
+                <li class="nav-item"><button class="btn btn-outline-secondary" id="theme-toggle">Alternar Tema</button></li>
+            </ul>
+        </div>
+    </nav>
+    <div id="detalhes" class="container mt-4">
+        <table id="filmeDetalhes" class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Título</th>
+                    <th>Sinopse</th>
+                    <th>Gênero</th>
+                    <th>Ano de Lançamento</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+            </tbody>
+        </table>
+
+        <h3>Análise</h3>
+        
+        <form id="adicionarAnaliseForm" onsubmit="manterAnalise(event)">
+            <div class="form-group">
+                <label for="analise">Observação:</label>
+                <textarea class="form-control" id="analise" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="nota">Nota:</label>
+                <input type="number" class="form-control" id="nota" min="1" max="5" required />
+            </div>
+            <button id="btnAdicionarAnalise" type="submit" class="btn btn-primary">Adicionar Análise</button>
+            <button id="btnAtualizarAnalise" type="submit" class="btn btn-primary">Atualizar Análise</button>
+            <button id="btnExcluirAnalise" type="submit" class="btn btn-danger">Excluir Análise</button>
+        </form>
+
+        <a href="/listarFilmes" class="btn btn-secondary mt-3">Voltar</a>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script>
+        function carregarDetalhesFilme() {
+            // Captura a string de consulta da URL
+            const queryString = window.location.search;
+
+            // Cria uma instância de URLSearchParams
+            const urlParams = new URLSearchParams(queryString);
+
+            // Recupera o valor do parâmetro 'id'
+            const filmeId = urlParams.get('filmeId');
+
+            $.ajax({
+                type: 'GET',
+                url: `http://localhost:8080/api/filmes/buscar/${filmeId}`, // Ajuste se necessário
+                dataType: 'json',
+                success: function(response) {
+                    $('#filmeDetalhes tbody').empty(); // Limpa a tabela
+                    const newRow = 
+                        `<tr>
+                            <td>${response.titulo}</td>
+                            <td>${response.sinopse}</td>
+                            <td>${response.genero}</td>
+                            <td>${response.anolancamento}</td>
+                        </tr>`;
+                    $('#filmeDetalhes tbody').append(newRow); // Adiciona a nova linha
+
+                    // Carregar análises do filme
+                    carregarAnalises(filmeId);
+                },
+                error: function() {
+                    alert('Erro ao carregar detalhes do filme. Tente novamente.');
+                }
+            });
+        }
+        
+        function manterAnalise(event){ 
+            
+            const acao = event.submitter.id;
+            
+            if (acao === "btnAdicionarAnalise" ) {
+                adicionarAnalise(event);
+            } else if (acao === "btnAtualizarAnalise" ) {
+                atualizarAnalises(event);
+            } else if (acao === "btnExcluirAnalise" ) {
+                excluirAnalises(event);
+            } else {
+                alert ('Opção inválida !');
+            }            
+        }
+        
+        function adicionarAnalise(event){
+            event.preventDefault();
+            
+            const filmeId = new URLSearchParams(window.location.search).get('filmeId');
+            
+            const analise = {
+                analise: document.getElementById('analise').value,
+                nota: document.getElementById('nota').value,
+                filmeId: filmeId
+            };
+            
+            $.ajax({
+                type: 'POST',
+                url:`http://localhost:8080/api/analises/${filmeId}`,
+                contentType:'application/json' ,
+                dataType:'json' ,
+                data: JSON.stringify(analise),
+                
+                success:function(response){
+                    alert('Analise cadastrada com sucesso');
+                    carregarAnalises(filmeId);
+                    
+//                    document.getElementById('adicionarAnaliseForm').reset();
+//                    document.getElementById('adicionarAnaliseForm').classList.add('hidden');
+                    
+                },
+                error: function() {
+                    alert('Só é possível cadastrar uma análise. Altere-a!');
+                }
+                
+             });    
+            
+        }
+        
+        function atualizarAnalises(event) {
+            event.preventDefault();
+            const filmeId = new URLSearchParams(window.location.search).get('filmeId');
+
+            const analise = {
+                analise: document.getElementById('analise').value,
+                nota: document.getElementById('nota').value
+            };
+
+            $.ajax({
+                type: 'PUT',
+                url: `http://localhost:8080/api/analises/${filmeId}`,
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify(analise),
+                success: function(response) {
+                    alert('Análise atualizada com sucesso!');
+                    carregarAnalises(filmeId);
+                },
+                error: function() {
+                    alert('Erro ao atualizar análise. Tente novamente.');
+                }
+            });
+        }
+
+        function excluirAnalises(event) {
+            event.preventDefault();
+            const filmeId = new URLSearchParams(window.location.search).get('filmeId');
+
+            $.ajax({
+                type: 'DELETE',
+                url: `http://localhost:8080/api/analises/${filmeId}`,
+                success: function() {
+                    alert('Análise excluída com sucesso!');
+                    
+                    $('#analise').val('');
+                    $('#nota').val('');
+                    
+                    carregarAnalises(filmeId);
+                },
+                error: function() {
+                    alert('Erro ao excluir análise. Tente novamente.');
+                }
+            });        }
+
+        function carregarAnalises(filmeId) {
+
+            $.ajax({
+                type: 'GET',
+                url: `http://localhost:8080/api/analises/${filmeId}`,
+                
+                success: function(analise) {
+                    console.log(analise); //verificar a resposta
+
+                    if (analise) {
+                        $('#nota').val(analise.nota);
+                        $('#analise').val(analise.analise);
+
+                        $('#btnAdicionarAnalise').hide();
+                        $('#btnAtualizarAnalise').show();
+                        $('#btnExcluirAnalise').show();
+
+                    } else {
+                        $('#btnAdicionarAnalise').show();
+                        $('#btnAtualizarAnalise').hide();
+                        $('#btnExcluirAnalise').hide();
+                    }
+                },
+                error: function() {
+   //                 alert('Erro ao carregar análises. Tente novamente.');
+                    $('#btnAdicionarAnalise').show();
+                    $('#btnAtualizarAnalise').hide();
+                    $('#btnExcluirAnalise').hide();
+                }
+            });
+        }
+
+        // Chama a função ao carregar a página
+        $(document).ready(function() {
+            carregarDetalhesFilme();
+        });
+    </script>
+    
+    <script src="/js/script.js"></script>
+</body>
+</html>
